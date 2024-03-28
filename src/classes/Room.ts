@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
 import { ICoordsPixels } from "../types/common";
-import { FloorTile, Tile, WallTile } from "./Tiles";
+import { DoorTile, FloorTile, Tile, WallTile } from "./Tiles";
 import GameState from "./GameState";
 import { Utilities } from "./Utilities";
 
@@ -15,6 +15,7 @@ class Room {
     static tileMap = {
         "#": WallTile,
         ".": FloorTile,
+        O: DoorTile,
     };
 
     constructor(layout: (Tile | null)[][]) {
@@ -75,6 +76,8 @@ class Room {
         }
 
         Room._fillRoomLayout(room);
+
+        Room._placeDoor(room);
 
         return room;
     }
@@ -184,6 +187,63 @@ class Room {
         }
     }
 
+    static _placeDoor(layout: (undefined | null | string)[][]) {
+        const possibleDoorLocations: number[][] = [];
+
+        for (let y = 0; y < layout.length; y++) {
+            for (let x = 0; x < layout[0].length; x++) {
+                const isInsideTopLeftCorner =
+                    layout[y - 1] &&
+                    layout[y - 1][x] === "#" &&
+                    layout[y][x - 1] === "#";
+                const isInsideTopRightCorner =
+                    layout[y - 1] &&
+                    layout[y - 1][x] === "#" &&
+                    layout[y][x + 1] === "#";
+                const isInsideBottomLeftCorner =
+                    layout[y + 1] &&
+                    layout[y + 1][x] === "#" &&
+                    layout[y][x - 1] === "#";
+                const isInsideBottomRightCorner =
+                    layout[y + 1] &&
+                    layout[y + 1][x] === "#" &&
+                    layout[y][x + 1] === "#";
+
+                const isInsideCorner =
+                    isInsideTopLeftCorner ||
+                    isInsideTopRightCorner ||
+                    isInsideBottomLeftCorner ||
+                    isInsideBottomRightCorner;
+
+                const isOutsideTopCorner =
+                    y === 0 && layout[y + 1] && layout[y + 1][x] === "#";
+                const isOutsideBottomCorner =
+                    y === layout.length - 1 &&
+                    layout[y - 1] &&
+                    layout[y - 1][x] === "#";
+
+                const isOutsideCorner =
+                    isOutsideTopCorner || isOutsideBottomCorner;
+
+                if (
+                    layout[y][x] === "#" &&
+                    !(isInsideCorner || isOutsideCorner)
+                ) {
+                    possibleDoorLocations.push([y, x]);
+                }
+            }
+        }
+
+        const [doorY, doorX] =
+            possibleDoorLocations[
+                Utilities.getRandomNumber({
+                    max: possibleDoorLocations.length - 1,
+                })
+            ];
+
+        layout[doorY][doorX] = "O";
+    }
+
     draw(scene: Scene) {
         for (let y = 0; y < this.layout.length; y++) {
             for (let x = 0; x < this.layout[0].length; x++) {
@@ -205,6 +265,18 @@ class Room {
         });
 
         return this.layout[yLayout][xLayout];
+    }
+
+    unload() {
+        for (let y = 0; y < this.layout.length; y++) {
+            for (let x = 0; x < this.layout[0].length; x++) {
+                const tile = this.layout[y][x];
+
+                if (!tile) continue;
+
+                tile.destroy();
+            }
+        }
     }
 }
 

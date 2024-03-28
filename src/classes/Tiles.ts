@@ -1,11 +1,13 @@
+import { GameObjects, Scene } from "phaser";
 import { ICoordsPixels, ITile } from "../types/common";
 import Room from "./Room";
+import { Game } from "../game/scenes/Game";
 
 class Tile extends Phaser.GameObjects.Text {
     standable: boolean;
     currentRoom?: Room;
     visible: boolean;
-    textObject: Phaser.GameObjects.Text | undefined;
+    textObject: GameObjects.Text | undefined;
 
     constructor({ scene, x, y, standable, symbol, currentRoom }: ITile) {
         super(scene, x, y, symbol, {});
@@ -15,10 +17,6 @@ class Tile extends Phaser.GameObjects.Text {
         this.visible = true;
     }
 
-    // create(scene: Phaser.Scene, {x, y}: ICoords) {
-    //     scene.add.text()
-    // }
-
     getCoordinates() {
         return `${this.x},${this.y}`;
     }
@@ -27,19 +25,34 @@ class Tile extends Phaser.GameObjects.Text {
         this.setX(x);
         this.setY(y);
     }
+
+    onStand(scene: Game) {
+        return;
+    }
 }
 
 class WallTile extends Tile {
-    constructor(scene: Phaser.Scene, { x, y }: ICoordsPixels) {
+    constructor(scene: Scene, { x, y }: ICoordsPixels) {
         super({ scene, x, y, standable: false, symbol: "#" });
     }
 }
 
 class FloorTile extends Tile {
-    constructor(scene: Phaser.Scene, { x, y }: ICoordsPixels) {
+    constructor(scene: Scene, { x, y }: ICoordsPixels) {
         super({ scene, x, y, standable: true, symbol: "." });
     }
 }
 
-export { Tile, WallTile, FloorTile };
+class DoorTile extends Tile {
+    constructor(scene: Scene, { x, y }: ICoordsPixels) {
+        super({ scene, x, y, standable: true, symbol: "O" });
+    }
+
+    onStand(scene: Game) {
+        console.log("DOOR!");
+        scene.replaceRoom();
+    }
+}
+
+export { Tile, WallTile, FloorTile, DoorTile };
 

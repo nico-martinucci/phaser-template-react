@@ -38,7 +38,7 @@ class Hero extends Phaser.GameObjects.Text {
         return this;
     }
 
-    move({ x, y }: ICoordsOptional) {
+    move(scene: Game, { x, y }: ICoordsOptional) {
         if (x) {
             this.setX(x);
         }
@@ -46,6 +46,8 @@ class Hero extends Phaser.GameObjects.Text {
         if (y) {
             this.setY(y);
         }
+
+        scene.room.getTile({ x: x || this.x, y: y || this.y })?.onStand(scene);
     }
 
     loadMovement(scene: Game) {
@@ -76,7 +78,7 @@ class Hero extends Phaser.GameObjects.Text {
 
             if (nextTile?.standable) {
                 nextTile.setVisible(false);
-                this.move({ y: this.y - yResolution });
+                this.move(scene, { y: this.y - yResolution });
                 currentTile?.setVisible(true);
             }
         });
@@ -93,7 +95,7 @@ class Hero extends Phaser.GameObjects.Text {
 
             if (nextTile?.standable) {
                 nextTile.setVisible(false);
-                this.move({ x: this.x - xResolution });
+                this.move(scene, { x: this.x - xResolution });
                 currentTile?.setVisible(true);
             }
         });
@@ -110,7 +112,7 @@ class Hero extends Phaser.GameObjects.Text {
 
             if (nextTile?.standable) {
                 nextTile.setVisible(false);
-                this.move({ y: this.y + yResolution });
+                this.move(scene, { y: this.y + yResolution });
                 currentTile?.setVisible(true);
             }
         });
@@ -127,7 +129,7 @@ class Hero extends Phaser.GameObjects.Text {
 
             if (nextTile?.standable) {
                 nextTile.setVisible(false);
-                this.move({ x: this.x + xResolution });
+                this.move(scene, { x: this.x + xResolution });
                 currentTile?.setVisible(true);
             }
         });
