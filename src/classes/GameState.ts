@@ -1,8 +1,8 @@
 import { ICoordsPixels, ICoordsLayout } from "../types/common";
 
 class GameState {
-    static xResolution = 12;
-    static yResolution = 12;
+    static xResolution = 14;
+    static yResolution = 14;
     static xOffset = 100;
     static yOffset = 100;
 
