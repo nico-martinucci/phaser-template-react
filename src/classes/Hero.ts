@@ -56,54 +56,79 @@ class Hero extends Phaser.GameObjects.Text {
 
         const { xResolution, yResolution } = GameState;
 
-        const currentTile = scene.room.getTile({ x: this.x, y: this.y });
+        const currentTile = scene.room.getTile({
+            x: this.x,
+            y: this.y,
+        });
+
+        currentTile?.setVisible(false);
 
         upArrow?.on("down", () => {
+            const currentTile = scene.room.getTile({
+                x: this.x,
+                y: this.y,
+            });
+
             const nextTile = scene.room.getTile({
                 x: this.x,
                 y: this.y - yResolution,
             });
 
-            if (nextTile.standable) {
+            if (nextTile?.standable) {
                 nextTile.setVisible(false);
                 this.move({ y: this.y - yResolution });
-                currentTile.setVisible(true);
+                currentTile?.setVisible(true);
             }
         });
         leftArrow?.on("down", () => {
+            const currentTile = scene.room.getTile({
+                x: this.x,
+                y: this.y,
+            });
+
             const nextTile = scene.room.getTile({
                 x: this.x - xResolution,
                 y: this.y,
             });
 
-            if (nextTile.standable) {
+            if (nextTile?.standable) {
                 nextTile.setVisible(false);
                 this.move({ x: this.x - xResolution });
-                currentTile.setVisible(true);
+                currentTile?.setVisible(true);
             }
         });
         downArrow?.on("down", () => {
+            const currentTile = scene.room.getTile({
+                x: this.x,
+                y: this.y,
+            });
+
             const nextTile = scene.room.getTile({
                 x: this.x,
                 y: this.y + yResolution,
             });
 
-            if (nextTile.standable) {
+            if (nextTile?.standable) {
                 nextTile.setVisible(false);
                 this.move({ y: this.y + yResolution });
-                currentTile.setVisible(true);
+                currentTile?.setVisible(true);
             }
         });
         rightArrow?.on("down", () => {
+            const currentTile = scene.room.getTile({
+                x: this.x,
+                y: this.y,
+            });
+
             const nextTile = scene.room.getTile({
                 x: this.x + xResolution,
                 y: this.y,
             });
 
-            if (nextTile.standable) {
+            if (nextTile?.standable) {
                 nextTile.setVisible(false);
                 this.move({ x: this.x + xResolution });
-                currentTile.setVisible(true);
+                currentTile?.setVisible(true);
             }
         });
     }
