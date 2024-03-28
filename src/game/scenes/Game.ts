@@ -12,8 +12,8 @@ export class Game extends Scene {
     preload() {}
 
     create() {
-        this.room = Room.create({ height: 10, width: 10 }).draw(this);
-        Hero.create({ x: 5, y: 5 }).draw(this).loadMovement(this);
+        this.room = Room.create(this, { height: 10, width: 10 });
+        Hero.create(this, { x: 3, y: 3 }).loadMovement(this);
     }
 }
 

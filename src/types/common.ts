@@ -1,7 +1,12 @@
 import Room from "../classes/Room";
 import { Tile } from "../classes/Tiles";
 
-interface ICoords {
+interface ICoordsPixels {
+    x: number;
+    y: number;
+}
+
+interface ICoordsLayout {
     x: number;
     y: number;
 }
@@ -11,15 +16,22 @@ interface ICoordsOptional {
     y?: number;
 }
 
-interface ITile extends ICoords {
+interface ITile extends ICoordsLayout {
     standable: boolean;
     symbol: string;
     currentRoom?: Room;
+    scene: Phaser.Scene;
 }
 
 interface IMoveableTile extends ITile {
     currentTile?: Tile;
 }
 
-export type { ICoords, ICoordsOptional, ITile, IMoveableTile };
+export type {
+    ICoordsPixels,
+    ICoordsLayout,
+    ICoordsOptional,
+    ITile,
+    IMoveableTile,
+};
 

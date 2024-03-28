@@ -1,5 +1,5 @@
 import { Scene } from "phaser";
-import { ICoords } from "../types/common";
+import { ICoordsPixels } from "../types/common";
 import { FloorTile, Tile, WallTile } from "./Tiles";
 import GameState from "./GameState";
 
@@ -15,20 +15,28 @@ class Room {
         this.layout = layout;
     }
 
-    static create({ height, width }: IRoom) {
+    static create(scene: Phaser.Scene, { height, width }: IRoom) {
         const layout: Tile[][] = [];
 
         for (let y = 0; y < height; y++) {
             const row: Tile[] = [];
 
             for (let x = 0; x < width; x++) {
+                const { xPixels, yPixels } = GameState.getPixelCoordinates({
+                    x,
+                    y,
+                });
                 if (y === 0 || y === height - 1) {
-                    row.push(new WallTile({ x, y }));
+                    row.push(new WallTile(scene, { x: xPixels, y: yPixels }));
                 } else {
                     if (x === 0 || x === width - 1) {
-                        row.push(new WallTile({ x, y }));
+                        row.push(
+                            new WallTile(scene, { x: xPixels, y: yPixels })
+                        );
                     } else {
-                        row.push(new FloorTile({ x, y }));
+                        row.push(
+                            new FloorTile(scene, { x: xPixels, y: yPixels })
+                        );
                     }
                 }
             }
@@ -36,7 +44,11 @@ class Room {
             layout.push(row);
         }
 
-        return new Room(layout);
+        const room = new Room(layout);
+
+        room.draw(scene);
+
+        return room;
     }
 
     draw(scene: Scene) {
@@ -46,26 +58,20 @@ class Room {
 
                 if (!tile.visible) continue;
 
-                const { x: xPixels, y: yPixels } =
-                    GameState.getPixelCoordinates({
-                        x,
-                        y,
-                    });
-
-                const textObject = scene.add.text(
-                    xPixels,
-                    yPixels,
-                    tile.symbol
-                );
-                tile.setTextObject(textObject);
+                scene.add.existing(tile);
             }
         }
 
         return this;
     }
 
-    getTile({ x, y }: ICoords) {
-        return this.layout[y][x];
+    getTile({ x, y }: ICoordsPixels) {
+        const { xLayout, yLayout } = GameState.getLayoutCoordinates({
+            x,
+            y,
+        });
+
+        return this.layout[yLayout][xLayout];
     }
 }
 
