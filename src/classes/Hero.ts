@@ -58,70 +58,70 @@ class Hero extends Phaser.GameObjects.Text {
         currentTile?.setVisible(false);
 
         upArrow?.on("down", () => {
-            scene.currentRoom
-                .getTile({
-                    x: this.x,
-                    y: this.y,
-                })
-                ?.onLeave(scene);
-
             const nextTile = scene.currentRoom.getTile({
                 x: this.x,
                 y: this.y - yResolution,
             });
 
             if (nextTile?.standable) {
+                scene.currentRoom
+                    .getTile({
+                        x: this.x,
+                        y: this.y,
+                    })
+                    ?.onLeave(scene);
+
                 this.move(scene, { y: this.y - yResolution });
             }
         });
         leftArrow?.on("down", () => {
-            scene.currentRoom
-                .getTile({
-                    x: this.x,
-                    y: this.y,
-                })
-                ?.onLeave(scene);
-
             const nextTile = scene.currentRoom.getTile({
                 x: this.x - xResolution,
                 y: this.y,
             });
 
             if (nextTile?.standable) {
+                scene.currentRoom
+                    .getTile({
+                        x: this.x,
+                        y: this.y,
+                    })
+                    ?.onLeave(scene);
+
                 this.move(scene, { x: this.x - xResolution });
             }
         });
         downArrow?.on("down", () => {
-            scene.currentRoom
-                .getTile({
-                    x: this.x,
-                    y: this.y,
-                })
-                ?.onLeave(scene);
-
             const nextTile = scene.currentRoom.getTile({
                 x: this.x,
                 y: this.y + yResolution,
             });
 
             if (nextTile?.standable) {
+                scene.currentRoom
+                    .getTile({
+                        x: this.x,
+                        y: this.y,
+                    })
+                    ?.onLeave(scene);
+
                 this.move(scene, { y: this.y + yResolution });
             }
         });
         rightArrow?.on("down", () => {
-            scene.currentRoom
-                .getTile({
-                    x: this.x,
-                    y: this.y,
-                })
-                ?.onLeave(scene);
-
             const nextTile = scene.currentRoom.getTile({
                 x: this.x + xResolution,
                 y: this.y,
             });
 
             if (nextTile?.standable) {
+                scene.currentRoom
+                    .getTile({
+                        x: this.x,
+                        y: this.y,
+                    })
+                    ?.onLeave(scene);
+
                 this.move(scene, { x: this.x + xResolution });
             }
         });

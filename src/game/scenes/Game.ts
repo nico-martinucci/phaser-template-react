@@ -19,20 +19,10 @@ export class Game extends Scene {
     create() {
         this.currentRoom = Room.create(this, { height: 10, width: 10 });
 
-        // @ts-ignore
-        const { x, y } = this.currentRoom.getDoorAdjacentTile(EnterDoorTile)!;
+        const { x, y } = this.currentRoom.getEntranceDoorAdjacentTile()!;
 
         this.hero = Hero.create(this, { x, y }).loadMovement(this);
     }
-
-    // replaceRoom() {
-    //     this.currentRoom.unload();
-    //     this.currentRoom = Room.create(this, { height: 10, width: 10 });
-
-    //     console.log(this.rooms);
-    //     const { x, y } = this.currentRoom.getDoorAdjacentTile(EnterDoorTile)!;
-    //     this.hero.move(this, { x, y });
-    // }
 
     getNextRoom() {
         this.currentRoom.unload();
@@ -47,8 +37,7 @@ export class Game extends Scene {
             this.currentRoom.draw(this);
         }
 
-        // @ts-ignore
-        const { x, y } = this.currentRoom.getDoorAdjacentTile(EnterDoorTile)!;
+        const { x, y } = this.currentRoom.getEntranceDoorAdjacentTile()!;
         this.hero.move(this, { x, y });
     }
 
@@ -63,10 +52,7 @@ export class Game extends Scene {
         this.currentRoom = this.rooms[this.currentRoom.number - 1];
         this.currentRoom.draw(this);
 
-        const { x, y } = this.currentRoom.getDoorAdjacentTile(
-            // @ts-ignore
-            () => ExitDoorTile
-        )!;
+        const { x, y } = this.currentRoom.getExitDoorAdjacentTile()!;
 
         this.hero.move(this, { x, y });
     }

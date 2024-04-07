@@ -381,12 +381,51 @@ class Room {
         return standableTiles;
     }
 
-    getDoorAdjacentTile(
-        doorTile: (() => EnterDoorTile) | (() => ExitDoorTile)
-    ) {
+    getEntranceDoorAdjacentTile() {
         for (let y = 0; y < this.layout.length; y++) {
             for (let x = 0; x < this.layout[0].length; x++) {
-                if (this.layout[y][x] instanceof doorTile) {
+                if (this.layout[y][x] instanceof EnterDoorTile) {
+                    if (
+                        this.layout[y - 1] &&
+                        this.layout[y - 1][x]?.standable
+                    ) {
+                        return this.layout[y - 1][x];
+                    }
+                    if (
+                        this.layout[y + 1] &&
+                        this.layout[y + 1][x]?.standable
+                    ) {
+                        return this.layout[y + 1][x];
+                    }
+                    if (
+                        this.layout[y][x - 1] &&
+                        this.layout[y][x - 1]?.standable
+                    ) {
+                        return this.layout[y][x - 1];
+                    }
+                    if (
+                        this.layout[y][x + 1] &&
+                        this.layout[y][x + 1]?.standable
+                    ) {
+                        return this.layout[y][x + 1];
+                    }
+                }
+            }
+        }
+
+        const standableTiles = this.getStandableTiles();
+
+        return standableTiles[
+            Utilities.getRandomNumber({
+                max: standableTiles.length - 1,
+            })
+        ];
+    }
+
+    getExitDoorAdjacentTile() {
+        for (let y = 0; y < this.layout.length; y++) {
+            for (let x = 0; x < this.layout[0].length; x++) {
+                if (this.layout[y][x] instanceof ExitDoorTile) {
                     if (
                         this.layout[y - 1] &&
                         this.layout[y - 1][x]?.standable
