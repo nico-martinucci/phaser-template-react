@@ -1,6 +1,6 @@
 import { Scene } from "phaser";
 import GameState from "./GameState";
-import { ICoordsOptional } from "../types/common";
+import { ICoordsOptional, ICoordsPixels } from "../types/common";
 import Room from "./Room";
 import { Game } from "../game/scenes/Game";
 
@@ -14,13 +14,8 @@ class Hero extends Phaser.GameObjects.Text {
         super(scene, x, y, "H", {});
     }
 
-    static create(scene: Phaser.Scene, { x, y }: IHero) {
-        const { xPixels, yPixels } = GameState.getPixelCoordinates({
-            x: x,
-            y: y,
-        });
-
-        const hero = new Hero(scene, { x: xPixels, y: yPixels });
+    static create(scene: Phaser.Scene, { x, y }: ICoordsPixels) {
+        const hero = new Hero(scene, { x, y });
 
         hero.draw(scene);
 
@@ -28,11 +23,6 @@ class Hero extends Phaser.GameObjects.Text {
     }
 
     draw(scene: Scene) {
-        const { xPixels, yPixels } = GameState.getPixelCoordinates({
-            x: this.x,
-            y: this.y,
-        });
-
         scene.add.existing(this);
 
         return this;
@@ -133,6 +123,8 @@ class Hero extends Phaser.GameObjects.Text {
                 currentTile?.setVisible(true);
             }
         });
+
+        return this;
     }
 
     updateLocation() {}

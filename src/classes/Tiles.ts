@@ -32,27 +32,44 @@ class Tile extends Phaser.GameObjects.Text {
 }
 
 class WallTile extends Tile {
+    static symbol = "#";
+
     constructor(scene: Scene, { x, y }: ICoordsPixels) {
-        super({ scene, x, y, standable: false, symbol: "#" });
+        super({ scene, x, y, standable: false, symbol: WallTile.symbol });
     }
 }
 
 class FloorTile extends Tile {
+    static symbol = ".";
+
     constructor(scene: Scene, { x, y }: ICoordsPixels) {
-        super({ scene, x, y, standable: true, symbol: "." });
+        super({ scene, x, y, standable: true, symbol: FloorTile.symbol });
     }
 }
 
-class DoorTile extends Tile {
+class ExitDoorTile extends Tile {
+    static symbol = "O";
+
     constructor(scene: Scene, { x, y }: ICoordsPixels) {
-        super({ scene, x, y, standable: true, symbol: "O" });
+        super({ scene, x, y, standable: true, symbol: ExitDoorTile.symbol });
     }
 
     onStand(scene: Game) {
-        console.log("DOOR!");
         scene.replaceRoom();
     }
 }
 
-export { Tile, WallTile, FloorTile, DoorTile };
+class EnterDoorTile extends Tile {
+    static symbol = "I";
+
+    constructor(scene: Scene, { x, y }: ICoordsPixels) {
+        super({ scene, x, y, standable: true, symbol: EnterDoorTile.symbol });
+    }
+
+    // onStand(scene: Game) {
+    //     scene.replaceRoom();
+    // }
+}
+
+export { Tile, WallTile, FloorTile, ExitDoorTile, EnterDoorTile };
 

@@ -1,6 +1,12 @@
 import { Scene } from "phaser";
 import { ICoordsPixels } from "../types/common";
-import { DoorTile, FloorTile, Tile, WallTile } from "./Tiles";
+import {
+    EnterDoorTile,
+    ExitDoorTile,
+    FloorTile,
+    Tile,
+    WallTile,
+} from "./Tiles";
 import GameState from "./GameState";
 import { Utilities } from "./Utilities";
 
@@ -13,9 +19,10 @@ class Room {
     layout: (Tile | null)[][];
 
     static tileMap = {
-        "#": WallTile,
-        ".": FloorTile,
-        O: DoorTile,
+        [WallTile.symbol]: WallTile,
+        [FloorTile.symbol]: FloorTile,
+        [ExitDoorTile.symbol]: ExitDoorTile,
+        [EnterDoorTile.symbol]: EnterDoorTile,
     };
 
     constructor(layout: (Tile | null)[][]) {
@@ -62,22 +69,42 @@ class Room {
     static _getRoomLayout({ height, width }: IRoomDimensions) {
         const room = Room._getEmptyRoom({ height, width });
 
-        if (Utilities.getRandomNumber({ max: 10, min: 1 }) > 5) {
-            Room._removeTopLeftCorner(room);
+        const hasTopLeftCornerCutout =
+            Utilities.getRandomNumber({ max: 10, min: 1 }) > 5;
+        const hasTopRightCornerCutout =
+            Utilities.getRandomNumber({ max: 10, min: 1 }) > 5;
+        const hasBottomLeftCornerCutout =
+            Utilities.getRandomNumber({ max: 10, min: 1 }) > 5;
+        const hasBottomRightCornerCutout =
+            Utilities.getRandomNumber({ max: 10, min: 1 }) > 5;
+
+        let bigCutout =
+            [
+                hasTopLeftCornerCutout,
+                hasTopRightCornerCutout,
+                hasBottomLeftCornerCutout,
+                hasBottomRightCornerCutout,
+            ].filter((bool) => bool).length === 1;
+
+        if (hasTopLeftCornerCutout) {
+            Room._removeTopLeftCorner(room, bigCutout);
         }
-        if (Utilities.getRandomNumber({ max: 10, min: 1 }) > 5) {
-            Room._removeTopRightCorner(room);
+        if (hasTopRightCornerCutout) {
+            Room._removeTopRightCorner(room, bigCutout);
         }
-        if (Utilities.getRandomNumber({ max: 10, min: 1 }) > 5) {
-            Room._removeBottomLeftCorner(room);
+        if (hasBottomLeftCornerCutout) {
+            Room._removeBottomLeftCorner(room, bigCutout);
         }
-        if (Utilities.getRandomNumber({ max: 10, min: 1 }) > 5) {
-            Room._removeBottomRightCorner(room);
+        if (hasBottomRightCornerCutout) {
+            Room._removeBottomRightCorner(room, bigCutout);
         }
 
         Room._fillRoomLayout(room);
 
-        Room._placeDoor(room);
+        const possibleDoorLocations = Room._getPossibleDoorLocations(room);
+
+        Room._placeDoor(room, possibleDoorLocations, ExitDoorTile.symbol);
+        Room._placeDoor(room, possibleDoorLocations, EnterDoorTile.symbol);
 
         return room;
     }
@@ -88,9 +115,16 @@ class Room {
         );
     }
 
-    static _removeTopLeftCorner(layout: (undefined | null)[][]) {
-        const { cutoutHeight, cutoutWidth } =
+    static _removeTopLeftCorner(layout: (undefined | null)[][], bigCutout) {
+        let { cutoutHeight, cutoutWidth } =
             Room._getSmallCutoutDimensions(layout);
+
+        if (bigCutout) {
+            const dimensions = Room._getBigCutoutDimensions(layout);
+
+            cutoutHeight = dimensions.cutoutHeight;
+            cutoutWidth = dimensions.cutoutWidth;
+        }
 
         for (let y = 0; y < cutoutHeight; y++) {
             for (let x = 0; x < cutoutWidth; x++) {
@@ -99,11 +133,18 @@ class Room {
         }
     }
 
-    static _removeTopRightCorner(layout: (undefined | null)[][]) {
+    static _removeTopRightCorner(layout: (undefined | null)[][], bigCutout) {
         const width = layout[0].length;
 
-        const { cutoutHeight, cutoutWidth } =
+        let { cutoutHeight, cutoutWidth } =
             Room._getSmallCutoutDimensions(layout);
+
+        if (bigCutout) {
+            const dimensions = Room._getBigCutoutDimensions(layout);
+
+            cutoutHeight = dimensions.cutoutHeight;
+            cutoutWidth = dimensions.cutoutWidth;
+        }
 
         for (let y = 0; y < cutoutHeight; y++) {
             for (let x = width - 1; x > width - cutoutWidth - 1; x--) {
@@ -112,12 +153,19 @@ class Room {
         }
     }
 
-    static _removeBottomRightCorner(layout: (undefined | null)[][]) {
+    static _removeBottomRightCorner(layout: (undefined | null)[][], bigCutout) {
         const height = layout.length;
         const width = layout[0].length;
 
-        const { cutoutHeight, cutoutWidth } =
+        let { cutoutHeight, cutoutWidth } =
             Room._getSmallCutoutDimensions(layout);
+
+        if (bigCutout) {
+            const dimensions = Room._getBigCutoutDimensions(layout);
+
+            cutoutHeight = dimensions.cutoutHeight;
+            cutoutWidth = dimensions.cutoutWidth;
+        }
 
         for (let y = height - 1; y > height - cutoutHeight - 1; y--) {
             for (let x = width - 1; x > width - cutoutWidth - 1; x--) {
@@ -126,11 +174,18 @@ class Room {
         }
     }
 
-    static _removeBottomLeftCorner(layout: (undefined | null)[][]) {
+    static _removeBottomLeftCorner(layout: (undefined | null)[][], bigCutout) {
         const height = layout.length;
 
-        const { cutoutHeight, cutoutWidth } =
+        let { cutoutHeight, cutoutWidth } =
             Room._getSmallCutoutDimensions(layout);
+
+        if (bigCutout) {
+            const dimensions = Room._getBigCutoutDimensions(layout);
+
+            cutoutHeight = dimensions.cutoutHeight;
+            cutoutWidth = dimensions.cutoutWidth;
+        }
 
         for (let y = height - 1; y > height - cutoutHeight - 1; y--) {
             for (let x = 0; x < cutoutWidth; x++) {
@@ -156,6 +211,26 @@ class Room {
         };
     }
 
+    static _getBigCutoutDimensions(layout: (undefined | null)[][]) {
+        const cutoutMin = Math.min(
+            Math.floor(layout.length / 3),
+            Math.floor(layout[0].length / 3)
+        );
+        const cutoutMaxHeight = Math.floor(layout.length * 0.75);
+        const cutoutMaxWidth = Math.floor(layout[0].length * 0.75);
+
+        return {
+            cutoutHeight: Utilities.getRandomNumber({
+                max: cutoutMaxHeight,
+                min: cutoutMin,
+            }),
+            cutoutWidth: Utilities.getRandomNumber({
+                max: cutoutMaxWidth,
+                min: cutoutMin,
+            }),
+        };
+    }
+
     static _fillRoomLayout(layout: (undefined | null | string)[][]) {
         const height = layout.length;
         const width = layout[0].length;
@@ -164,7 +239,7 @@ class Room {
             for (let x = 0; x < width; x++) {
                 if (layout[y][x] === null) continue;
                 if (y === 0 || y === height - 1) {
-                    layout[y][x] = "#";
+                    layout[y][x] = WallTile.symbol;
                 } else {
                     if (
                         x === 0 ||
@@ -178,36 +253,36 @@ class Room {
                         layout[y + 1][x - 1] === null ||
                         layout[y - 1][x - 1] === null
                     ) {
-                        layout[y][x] = "#";
+                        layout[y][x] = WallTile.symbol;
                     } else {
-                        layout[y][x] = ".";
+                        layout[y][x] = FloorTile.symbol;
                     }
                 }
             }
         }
     }
 
-    static _placeDoor(layout: (undefined | null | string)[][]) {
+    static _getPossibleDoorLocations(layout: (undefined | null | string)[][]) {
         const possibleDoorLocations: number[][] = [];
 
         for (let y = 0; y < layout.length; y++) {
             for (let x = 0; x < layout[0].length; x++) {
                 const isInsideTopLeftCorner =
                     layout[y - 1] &&
-                    layout[y - 1][x] === "#" &&
-                    layout[y][x - 1] === "#";
+                    layout[y - 1][x] === WallTile.symbol &&
+                    layout[y][x - 1] === WallTile.symbol;
                 const isInsideTopRightCorner =
                     layout[y - 1] &&
-                    layout[y - 1][x] === "#" &&
-                    layout[y][x + 1] === "#";
+                    layout[y - 1][x] === WallTile.symbol &&
+                    layout[y][x + 1] === WallTile.symbol;
                 const isInsideBottomLeftCorner =
                     layout[y + 1] &&
-                    layout[y + 1][x] === "#" &&
-                    layout[y][x - 1] === "#";
+                    layout[y + 1][x] === WallTile.symbol &&
+                    layout[y][x - 1] === WallTile.symbol;
                 const isInsideBottomRightCorner =
                     layout[y + 1] &&
-                    layout[y + 1][x] === "#" &&
-                    layout[y][x + 1] === "#";
+                    layout[y + 1][x] === WallTile.symbol &&
+                    layout[y][x + 1] === WallTile.symbol;
 
                 const isInsideCorner =
                     isInsideTopLeftCorner ||
@@ -216,17 +291,19 @@ class Room {
                     isInsideBottomRightCorner;
 
                 const isOutsideTopCorner =
-                    y === 0 && layout[y + 1] && layout[y + 1][x] === "#";
+                    y === 0 &&
+                    layout[y + 1] &&
+                    layout[y + 1][x] === WallTile.symbol;
                 const isOutsideBottomCorner =
                     y === layout.length - 1 &&
                     layout[y - 1] &&
-                    layout[y - 1][x] === "#";
+                    layout[y - 1][x] === WallTile.symbol;
 
                 const isOutsideCorner =
                     isOutsideTopCorner || isOutsideBottomCorner;
 
                 if (
-                    layout[y][x] === "#" &&
+                    layout[y][x] === WallTile.symbol &&
                     !(isInsideCorner || isOutsideCorner)
                 ) {
                     possibleDoorLocations.push([y, x]);
@@ -234,14 +311,24 @@ class Room {
             }
         }
 
-        const [doorY, doorX] =
-            possibleDoorLocations[
-                Utilities.getRandomNumber({
-                    max: possibleDoorLocations.length - 1,
-                })
-            ];
+        return possibleDoorLocations;
+    }
 
-        layout[doorY][doorX] = "O";
+    static _placeDoor(
+        layout: (undefined | null | string)[][],
+        possibleDoorLocations: number[][],
+        door: string
+    ) {
+        const locationIndex = Utilities.getRandomNumber({
+            max: possibleDoorLocations.length - 1,
+        });
+
+        const [doorY, doorX] = possibleDoorLocations.splice(
+            locationIndex,
+            1
+        )[0];
+
+        layout[doorY][doorX] = door;
     }
 
     draw(scene: Scene) {
@@ -265,6 +352,63 @@ class Room {
         });
 
         return this.layout[yLayout][xLayout];
+    }
+
+    getStandableTiles() {
+        const standableTiles: Tile[] = [];
+
+        for (let y = 0; y < this.layout.length; y++) {
+            for (let x = 0; x < this.layout[0].length; x++) {
+                const tile = this.layout[y][x];
+
+                if (tile?.standable) {
+                    standableTiles.push(tile);
+                }
+            }
+        }
+
+        return standableTiles;
+    }
+
+    getEnterDoorAdjacentTile() {
+        for (let y = 0; y < this.layout.length; y++) {
+            for (let x = 0; x < this.layout[0].length; x++) {
+                if (this.layout[y][x] instanceof EnterDoorTile) {
+                    if (
+                        this.layout[y - 1] &&
+                        this.layout[y - 1][x]?.standable
+                    ) {
+                        return this.layout[y - 1][x];
+                    }
+                    if (
+                        this.layout[y + 1] &&
+                        this.layout[y + 1][x]?.standable
+                    ) {
+                        return this.layout[y + 1][x];
+                    }
+                    if (
+                        this.layout[y][x - 1] &&
+                        this.layout[y][x - 1]?.standable
+                    ) {
+                        return this.layout[y][x - 1];
+                    }
+                    if (
+                        this.layout[y][x + 1] &&
+                        this.layout[y][x + 1]?.standable
+                    ) {
+                        return this.layout[y][x + 1];
+                    }
+                }
+            }
+        }
+
+        const standableTiles = this.getStandableTiles();
+
+        return standableTiles[
+            Utilities.getRandomNumber({
+                max: standableTiles.length - 1,
+            })
+        ];
     }
 
     unload() {
