@@ -9,6 +9,7 @@ import {
 } from "./Tiles";
 import GameState from "./GameState";
 import { Utilities } from "./Utilities";
+import { Game } from "../game/scenes/Game";
 
 interface IRoomDimensions {
     height: number;
@@ -17,6 +18,12 @@ interface IRoomDimensions {
 
 class Room {
     layout: (Tile | null)[][];
+    number: number;
+
+    constructor(layout: (Tile | null)[][]) {
+        this.layout = layout;
+        this.number = Room.getAndIncrementRoomCount();
+    }
 
     static tileMap = {
         [WallTile.symbol]: WallTile,
@@ -25,11 +32,13 @@ class Room {
         [EnterDoorTile.symbol]: EnterDoorTile,
     };
 
-    constructor(layout: (Tile | null)[][]) {
-        this.layout = layout;
+    static roomCount = 0;
+
+    static getAndIncrementRoomCount() {
+        return Room.roomCount++;
     }
 
-    static create(scene: Phaser.Scene, { height, width }: IRoomDimensions) {
+    static create(scene: Game, { height, width }: IRoomDimensions) {
         const layout = Room._getRoomLayout({ height, width });
 
         const tileLayout: (Tile | null)[][] = [];
@@ -62,6 +71,8 @@ class Room {
         const room = new Room(tileLayout);
 
         room.draw(scene);
+
+        scene.rooms.push(room);
 
         return room;
     }
@@ -370,10 +381,12 @@ class Room {
         return standableTiles;
     }
 
-    getEnterDoorAdjacentTile() {
+    getDoorAdjacentTile(
+        doorTile: (() => EnterDoorTile) | (() => ExitDoorTile)
+    ) {
         for (let y = 0; y < this.layout.length; y++) {
             for (let x = 0; x < this.layout[0].length; x++) {
-                if (this.layout[y][x] instanceof EnterDoorTile) {
+                if (this.layout[y][x] instanceof doorTile) {
                     if (
                         this.layout[y - 1] &&
                         this.layout[y - 1][x]?.standable
@@ -418,7 +431,7 @@ class Room {
 
                 if (!tile) continue;
 
-                tile.destroy();
+                tile.removeFromDisplayList();
             }
         }
     }

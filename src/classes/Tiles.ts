@@ -29,6 +29,10 @@ class Tile extends Phaser.GameObjects.Text {
     onStand(scene: Game) {
         return;
     }
+
+    onLeave(scene: Game) {
+        return;
+    }
 }
 
 class WallTile extends Tile {
@@ -45,6 +49,14 @@ class FloorTile extends Tile {
     constructor(scene: Scene, { x, y }: ICoordsPixels) {
         super({ scene, x, y, standable: true, symbol: FloorTile.symbol });
     }
+
+    onStand(scene: Game) {
+        this.setVisible(false);
+    }
+
+    onLeave(scene: Game) {
+        this.setVisible(true);
+    }
 }
 
 class ExitDoorTile extends Tile {
@@ -55,7 +67,7 @@ class ExitDoorTile extends Tile {
     }
 
     onStand(scene: Game) {
-        scene.replaceRoom();
+        scene.getNextRoom();
     }
 }
 
@@ -66,9 +78,9 @@ class EnterDoorTile extends Tile {
         super({ scene, x, y, standable: true, symbol: EnterDoorTile.symbol });
     }
 
-    // onStand(scene: Game) {
-    //     scene.replaceRoom();
-    // }
+    onStand(scene: Game) {
+        scene.getPreviousRoom();
+    }
 }
 
 export { Tile, WallTile, FloorTile, ExitDoorTile, EnterDoorTile };

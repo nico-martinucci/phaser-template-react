@@ -37,7 +37,9 @@ class Hero extends Phaser.GameObjects.Text {
             this.setY(y);
         }
 
-        scene.room.getTile({ x: x || this.x, y: y || this.y })?.onStand(scene);
+        scene.currentRoom
+            .getTile({ x: x || this.x, y: y || this.y })
+            ?.onStand(scene);
     }
 
     loadMovement(scene: Game) {
@@ -48,7 +50,7 @@ class Hero extends Phaser.GameObjects.Text {
 
         const { xResolution, yResolution } = GameState;
 
-        const currentTile = scene.room.getTile({
+        const currentTile = scene.currentRoom.getTile({
             x: this.x,
             y: this.y,
         });
@@ -56,71 +58,71 @@ class Hero extends Phaser.GameObjects.Text {
         currentTile?.setVisible(false);
 
         upArrow?.on("down", () => {
-            const currentTile = scene.room.getTile({
-                x: this.x,
-                y: this.y,
-            });
+            scene.currentRoom
+                .getTile({
+                    x: this.x,
+                    y: this.y,
+                })
+                ?.onLeave(scene);
 
-            const nextTile = scene.room.getTile({
+            const nextTile = scene.currentRoom.getTile({
                 x: this.x,
                 y: this.y - yResolution,
             });
 
             if (nextTile?.standable) {
-                nextTile.setVisible(false);
                 this.move(scene, { y: this.y - yResolution });
-                currentTile?.setVisible(true);
             }
         });
         leftArrow?.on("down", () => {
-            const currentTile = scene.room.getTile({
-                x: this.x,
-                y: this.y,
-            });
+            scene.currentRoom
+                .getTile({
+                    x: this.x,
+                    y: this.y,
+                })
+                ?.onLeave(scene);
 
-            const nextTile = scene.room.getTile({
+            const nextTile = scene.currentRoom.getTile({
                 x: this.x - xResolution,
                 y: this.y,
             });
 
             if (nextTile?.standable) {
-                nextTile.setVisible(false);
                 this.move(scene, { x: this.x - xResolution });
-                currentTile?.setVisible(true);
             }
         });
         downArrow?.on("down", () => {
-            const currentTile = scene.room.getTile({
-                x: this.x,
-                y: this.y,
-            });
+            scene.currentRoom
+                .getTile({
+                    x: this.x,
+                    y: this.y,
+                })
+                ?.onLeave(scene);
 
-            const nextTile = scene.room.getTile({
+            const nextTile = scene.currentRoom.getTile({
                 x: this.x,
                 y: this.y + yResolution,
             });
 
             if (nextTile?.standable) {
-                nextTile.setVisible(false);
                 this.move(scene, { y: this.y + yResolution });
-                currentTile?.setVisible(true);
             }
         });
         rightArrow?.on("down", () => {
-            const currentTile = scene.room.getTile({
-                x: this.x,
-                y: this.y,
-            });
+            scene.currentRoom
+                .getTile({
+                    x: this.x,
+                    y: this.y,
+                })
+                ?.onLeave(scene);
 
-            const nextTile = scene.room.getTile({
+            const nextTile = scene.currentRoom.getTile({
                 x: this.x + xResolution,
                 y: this.y,
             });
 
             if (nextTile?.standable) {
-                nextTile.setVisible(false);
                 this.move(scene, { x: this.x + xResolution });
-                currentTile?.setVisible(true);
             }
         });
 
